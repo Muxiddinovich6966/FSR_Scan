@@ -44,7 +44,7 @@ export default function App() {
 
     // API BASE
     const getApiBase = () => {
-        if (Platform.OS === 'web') return 'http://localhost:8000/api';
+        if (Platform.OS === 'web') return 'https://fsr-scan.onrender.com/api';
         const debuggerHost = Constants.expoConfig?.hostUri;
         if (debuggerHost) {
             const ip = debuggerHost.split(':')[0];
