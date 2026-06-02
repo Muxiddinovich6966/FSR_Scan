@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FSR SafeScan — Admin Panel</title>
+<style>
+:root {
+    --bg: #060b18; --surface: #0d1526; --card: #111e33;
+    --border: rgba(255,255,255,0.06); --primary: #3b82f6;
+    --cyan: #38bdf8; --success: #22c55e; --danger: #ef4444;
+    --warning: #f59e0b; --text: #f1f5f9; --muted: #64748b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* LOGIN */
+.login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.login-box { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 36px; width: 100%; max-width: 380px; }
+.login-logo { text-align: center; font-size: 48px; margin-bottom: 12px; }
+.login-title { text-align: center; font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.login-sub { text-align: center; color: var(--muted); font-size: 13px; margin-bottom: 28px; }
+
+/* LAYOUT */
+.layout { display: flex; min-height: 100vh; }
+.sidebar { width: 240px; background: var(--card); border-right: 1px solid var(--border); padding: 20px 0; flex-shrink: 0; }
+.sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 0 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+.sidebar-logo span { font-size: 24px; }
+.sidebar-logo h2 { font-size: 14px; font-weight: 700; }
+.sidebar-logo p { font-size: 11px; color: var(--muted); }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; transition: all 0.15s; border-left: 3px solid transparent; }
+.nav-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+.nav-item.active { color: var(--cyan); background: rgba(56,189,248,0.06); border-left-color: var(--cyan); }
+.nav-icon { font-size: 16px; width: 20px; text-align: center; }
+.main { flex: 1; padding: 28px; overflow-y: auto; }
+.page { display: none; }
+.page.active { display: block; }
+.page-title { font-size: 20px; font-weight: 700; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; }
+
+/* CARDS */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 24px; }
+.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+.stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.stat-num { font-size: 30px; font-weight: 800; }
+.stat-num.c-total { color: var(--cyan); }
+.stat-num.c-safe { color: var(--success); }
+.stat-num.c-danger { color: var(--danger); }
+.stat-num.c-users { color: var(--warning); }
+
+/* TABLE */
+.table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 20px; }
+.table-header { padding: 14px 18px; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { padding: 10px 14px; text-align: left; color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+td { padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+
+/* BADGE */
+.badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+.badge-safe { background: rgba(34,197,94,0.1); color: var(--success); }
+.badge-danger { background: rgba(239,68,68,0.1); color: var(--danger); }
+.badge-url { background: rgba(56,189,248,0.1); color: var(--cyan); }
+.badge-sms { background: rgba(168,85,247,0.1); color: #a855f7; }
+.badge-file { background: rgba(245,158,11,0.1); color: var(--warning); }
+.badge-admin { background: rgba(239,68,68,0.1); color: var(--danger); }
+.badge-user { background: rgba(100,116,139,0.1); color: var(--muted); }
+
+/* CHART */
+.chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+.chart-title { font-size: 13px; font-weight: 600; margin-bottom: 16px; color: var(--muted); }
+.bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 12px; }
+.bar-label { width: 60px; color: var(--muted); }
+.bar-wrap { flex: 1; height: 8px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 99px; transition: width 0.6s ease; }
+.bar-val { width: 30px; text-align: right; color: var(--text); font-weight: 600; }
+
+/* INPUTS */
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.field input { width: 100%; padding: 11px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 14px; outline: none; transition: border-color 0.2s; }
+.field input:focus { border-color: var(--primary); }
+.btn { padding: 11px 20px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.btn-primary { background: linear-gradient(135deg, #2563eb, #0ea5e9); color: white; width: 100%; }
+.btn-primary:hover { opacity: 0.9; }
+.btn-sm { padding: 5px 12px; font-size: 12px; }
+.btn-danger { background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); }
+.error-msg { color: var(--danger); font-size: 13px; margin-top: 10px; text-align: center; display: none; }
+
+/* LOGOUT */
+.sidebar-bottom { padding: 16px 20px; border-top: 1px solid var(--border); margin-top: auto; }
+.user-info { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.user-avatar { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #2563eb, #0ea5e9); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
+.user-name { font-size: 13px; font-weight: 600; }
+.user-role { font-size: 11px; color: var(--muted); }
+.btn-logout { width: 100%; padding: 8px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.15); border-radius: 8px; color: var(--danger); font-size: 12px; font-weight: 600; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginPage" class="login-wrap">
+    <div class="login-box">
+        <div class="login-logo">🛡️</div>
+        <div class="login-title">Admin Panel</div>
+        <div class="login-sub">FSR SafeScan boshqaruv markazi</div>
+        <div class="field"><label>Foydalanuvchi nomi</label><input type="text" id="loginUsername" placeholder="admin"></div>
+        <div class="field"><label>Parol</label><input type="password" id="loginPassword" placeholder="••••••"></div>
+        <button class="btn btn-primary" onclick="doLogin()">Kirish</button>
+        <div class="error-msg" id="loginError"></div>
+    </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboardPage" class="layout" style="display:none">
+    <!-- SIDEBAR -->
+    <div class="sidebar" style="display:flex;flex-direction:column">
+        <div class="sidebar-logo">
+            <span>🛡️</span>
+            <div><h2>FSR SafeScan</h2><p>Admin Panel</p></div>
+        </div>
+        <div class="nav-item active" onclick="showPage('overview',this)"><span class="nav-icon">📊</span> Umumiy</div>
+        <div class="nav-item" onclick="showPage('scans',this)"><span class="nav-icon">🔍</span> Skanlar</div>
+        <div class="nav-item" onclick="showPage('users',this)"><span class="nav-icon">👥</span> Foydalanuvchilar</div>
+        <div style="flex:1"></div>
+        <div class="sidebar-bottom">
+            <div class="user-info">
+                <div class="user-avatar" id="adminAvatar">A</div>
+                <div><div class="user-name" id="adminName">Admin</div><div class="user-role">Administrator</div></div>
+            </div>
+            <button class="btn-logout" onclick="doLogout()">🚪 Chiqish</button>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+        <!-- OVERVIEW -->
+        <div class="page active" id="page-overview">
+            <div class="page-title">📊 Umumiy statistika</div>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-label">Jami skanlar</div><div class="stat-num c-total" id="stTotal">—</div></div>
+                <div class="stat-card"><div class="stat-label">Xavfsiz</div><div class="stat-num c-safe" id="stSafe">—</div></div>
+                <div class="stat-card"><div class="stat-label">Xavfli</div><div class="stat-num c-danger" id="stDanger">—</div></div>
+                <div class="stat-card"><div class="stat-label">Foydalanuvchilar</div><div class="stat-num c-users" id="stUsers">—</div></div>
+            </div>
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <div class="chart-title">Skan turlari bo'yicha</div>
+                    <div id="chartByType"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">So'nggi 7 kun</div>
+                    <div id="chartDaily"></div>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <div class="table-header"><span>So'nggi skanlar</span></div>
+                <table><thead><tr><th>Tur</th><th>Ma'lumot</th><th>Holat</th><th>Ball</th><th>Sana</th></tr></thead>
+                <tbody id="recentTable"></tbody></table>
+            </div>
+        </div>
+
+        <!-- SCANS -->
+        <div class="page" id="page-scans">
+            <div class="page-title">🔍 Barcha skanlar</div>
+            <div class="table-wrap">
+                <div class="table-header"><span id="scanCount">Yuklanmoqda...</span></div>
+                <table><thead><tr><th>ID</th><th>Tur</th><th>Ma'lumot</th><th>Foydalanuvchi</th><th>Holat</th><th>Ball</th><th>Sana</th><th></th></tr></thead>
+                <tbody id="scansTable"></tbody></table>
+            </div>
+        </div>
+
+        <!-- USERS -->
+        <div class="page" id="page-users">
+            <div class="page-title">👥 Foydalanuvchilar</div>
+            <div class="table-wrap">
+                <div class="table-header"><span id="userCount">Yuklanmoqda...</span></div>
+                <table><thead><tr><th>ID</th><th>Foydalanuvchi</th><th>Email</th><th>Rol</th><th>Ro'yxat sanasi</th><th></th></tr></thead>
+                <tbody id="usersTable"></tbody></table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+const API = 'http://localhost:8000/api';
+let token = localStorage.getItem('admin_token') || '';
+let statsData = null;
+
+async function doLogin() {
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+    const errEl = document.getElementById('loginError');
+    errEl.style.display = 'none';
+
+    try {
+        const r = await fetch(API + '/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        const data = await r.json();
+        if (!r.ok) { errEl.textContent = data.detail || 'Xatolik'; errEl.style.display = 'block'; return; }
+        if (data.role !== 'admin') { errEl.textContent = 'Admin huquqi yo\'q!'; errEl.style.display = 'block'; return; }
+        token = data.token;
+        localStorage.setItem('admin_token', token);
+        document.getElementById('adminName').textContent = data.username;
+        document.getElementById('adminAvatar').textContent = data.username[0].toUpperCase();
+        showDashboard();
+    } catch(e) {
+        errEl.textContent = 'Server bilan ulanib bo\'lmadi!';
+        errEl.style.display = 'block';
+    }
+}
+
+function doLogout() {
+    localStorage.removeItem('admin_token');
+    token = '';
+    document.getElementById('loginPage').style.display = 'flex';
+    document.getElementById('dashboardPage').style.display = 'none';
+}
+
+function showDashboard() {
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('dashboardPage').style.display = 'flex';
+    loadStats();
+}
+
+function showPage(name, el) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    el.classList.add('active');
+    if (name === 'scans') renderScans();
+    if (name === 'users') renderUsers();
+}
+
+async function loadStats() {
+    try {
+        const r = await fetch(API + '/admin/stats', { headers: { 'Authorization': 'Bearer ' + token } });
+        if (r.status === 401 || r.status === 403) { doLogout(); return; }
+        statsData = await r.json();
+        renderOverview();
+    } catch(e) { console.error(e); }
+}
+
+function renderOverview() {
+    if (!statsData) return;
+    document.getElementById('stTotal').textContent = statsData.total;
+    document.getElementById('stSafe').textContent = statsData.safe;
+    document.getElementById('stDanger').textContent = statsData.danger;
+    document.getElementById('stUsers').textContent = statsData.totalUsers;
+
+    // By type chart
+    const byType = statsData.byType || [];
+    const maxCount = Math.max(...byType.map(t => t.count), 1);
+    const typeColors = { url: '#38bdf8', sms: '#a855f7', file: '#f59e0b' };
+    document.getElementById('chartByType').innerHTML = byType.map(t => `
+        <div class="bar-row">
+            <div class="bar-label">${t.type.toUpperCase()}</div>
+            <div class="bar-wrap"><div class="bar-fill" style="width:${t.count/maxCount*100}%;background:${typeColors[t.type]||'#64748b'}"></div></div>
+            <div class="bar-val">${t.count}</div>
+        </div>
+    `).join('') || '<div style="color:var(--muted);font-size:13px">Ma\'lumot yo\'q</div>';
+
+    // Daily chart
+    const daily = (statsData.dailyStats || []).reverse();
+    const maxDaily = Math.max(...daily.map(d => d.count), 1);
+    document.getElementById('chartDaily').innerHTML = daily.map(d => `
+        <div class="bar-row">
+            <div class="bar-label" style="width:80px;font-size:11px">${d.day.slice(5)}</div>
+            <div class="bar-wrap"><div class="bar-fill" style="width:${d.count/maxDaily*100}%;background:#3b82f6"></div></div>
+            <div class="bar-val">${d.count}</div>
+        </div>
+    `).join('') || '<div style="color:var(--muted);font-size:13px">Ma\'lumot yo\'q</div>';
+
+    // Recent table
+    document.getElementById('recentTable').innerHTML = (statsData.recentScans || []).map(s => `
+        <tr>
+            <td><span class="badge badge-${s.type}">${s.type.toUpperCase()}</span></td>
+            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)">${s.data}</td>
+            <td><span class="badge ${s.is_safe ? 'badge-safe' : 'badge-danger'}">${s.is_safe ? 'Xavfsiz' : 'Xavfli'}</span></td>
+            <td style="font-weight:700;color:${s.is_safe?'var(--success)':'var(--danger)'}">${s.score}%</td>
+            <td style="color:var(--muted);font-size:12px">${s.created_at.slice(0,16)}</td>
+        </tr>
+    `).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Hali skan yo\'q</td></tr>';
+}
+
+function renderScans() {
+    if (!statsData) return;
+    const scans = statsData.recentScans || [];
+    document.getElementById('scanCount').textContent = `Jami: ${statsData.total} ta skan`;
+    document.getElementById('scansTable').innerHTML = scans.map(s => `
+        <tr>
+            <td style="color:var(--muted)">#${s.id}</td>
+            <td><span class="badge badge-${s.type}">${s.type.toUpperCase()}</span></td>
+            <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)">${s.data}</td>
+            <td style="color:var(--muted)">${s.username || '—'}</td>
+            <td><span class="badge ${s.is_safe ? 'badge-safe' : 'badge-danger'}">${s.is_safe ? 'Xavfsiz' : 'Xavfli'}</span></td>
+            <td style="font-weight:700;color:${s.is_safe?'var(--success)':'var(--danger)'}">${s.score}%</td>
+            <td style="color:var(--muted);font-size:12px">${s.created_at.slice(0,16)}</td>
+            <td><button class="btn btn-sm btn-danger" onclick="deleteScan(${s.id}, this)">O'chir</button></td>
+        </tr>
+    `).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">Hali skan yo\'q</td></tr>';
+}
+
+function renderUsers() {
+    if (!statsData) return;
+    const users = statsData.users || [];
+    document.getElementById('userCount').textContent = `Jami: ${users.length} ta foydalanuvchi`;
+    document.getElementById('usersTable').innerHTML = users.map(u => `
+        <tr>
+            <td style="color:var(--muted)">#${u.id}</td>
+            <td style="font-weight:600">${u.username}</td>
+            <td style="color:var(--muted)">${u.email}</td>
+            <td><span class="badge ${u.role==='admin'?'badge-admin':'badge-user'}">${u.role}</span></td>
+            <td style="color:var(--muted);font-size:12px">${u.created_at.slice(0,10)}</td>
+            <td>
+                ${u.role !== 'admin'
+                    ? `<button class="btn btn-sm" style="background:rgba(59,130,246,0.1);color:var(--primary);border:1px solid rgba(59,130,246,0.2)" onclick="makeAdmin(${u.id})">Admin qil</button>`
+                    : `<button class="btn btn-sm btn-danger" onclick="removeAdmin(${u.id})">Admin olish</button>`
+                }
+                <button class="btn btn-sm btn-danger" onclick="deleteUser(${u.id}, '${u.username}')">O'chir</button>
+            </td>
+        </tr>
+    `).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Foydalanuvchi yo\'q</td></tr>';
+}
+
+async function deleteScan(id, btn) {
+    if (!confirm('O\'chirishni tasdiqlaysizmi?')) return;
+    btn.disabled = true;
+    const r = await fetch(API + '/admin/scans/' + id, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (r.ok) { await loadStats(); renderScans(); }
+}
+
+async function makeAdmin(id) {
+    if (!confirm('Bu foydalanuvchini admin qilasizmi?')) return;
+    const r = await fetch(API + '/admin/users/' + id + '/role?role=admin', {
+        method: 'PUT',
+        headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (r.ok) { await loadStats(); renderUsers(); }
+}
+
+async function deleteUser(id, username) {
+    if (!confirm(username + ' ni o\'chirishni tasdiqlaysizmi?\nBu amalni qaytarib bo\'lmaydi!')) return;
+    const r = await fetch(API + '/admin/users/' + id, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (r.ok) {
+        alert(username + ' o\'chirildi!');
+        await loadStats();
+        renderUsers();
+    }
+}
+async function removeAdmin(id) {
+    if (!confirm('Admin huquqini olib tashlaysizmi?')) return;
+    const r = await fetch(API + '/admin/users/' + id + '/role?role=user', {
+        method: 'PUT',
+        headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (r.ok) { await loadStats(); renderUsers(); }
+}
+
+// Enter tugmasi
+document.getElementById('loginPassword').addEventListener('keypress', e => {
+    if (e.key === 'Enter') doLogin();
+});
+
+// Auto login
+if (token) {
+    fetch(API + '/auth/me', { headers: { 'Authorization': 'Bearer ' + token } })
+        .then(r => r.json())
+        .then(data => {
+            if (data.role === 'admin') {
+                document.getElementById('adminName').textContent = data.username;
+                document.getElementById('adminAvatar').textContent = data.username[0].toUpperCase();
+                showDashboard();
+            }
+        }).catch(() => {});
+}
+</script>
+</body>
+</html>
