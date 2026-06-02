@@ -42,17 +42,22 @@ export default function App() {
     const [regStep, setRegStep] = useState(1); // 1=email, 2=otp+info
     const [regLoading, setRegLoading] = useState(false);
 
-    // API BASE
-    const getApiBase = () => {
-        if (Platform.OS === 'web') return 'https://fsr-scan.onrender.com/api';
-        const debuggerHost = Constants.expoConfig?.hostUri;
-        if (debuggerHost) {
-            const ip = debuggerHost.split(':')[0];
-            return `http://${ip}:8000/api`;
-        }
-        if (Platform.OS === 'android') return 'http://10.0.2.2:8000/api';
-        return 'http://localhost:8000/api';
-    };
+//    // API BASE
+//    const getApiBase = () => {
+//        if (Platform.OS === 'web') return 'https://fsr-scan.onrender.com/api';
+//        const debuggerHost = Constants.expoConfig?.hostUri;
+//        if (debuggerHost) {
+//            const ip = debuggerHost.split(':')[0];
+//            return `http://${ip}:8000/api`;
+//        }
+//        if (Platform.OS === 'android') return 'http://10.0.2.2:8000/api';
+//        return 'http://localhost:8000/api';
+//    };
+
+const getApiBase = () => {
+    return 'https://fsr-scan.onrender.com/api';
+};
+
 
     // Token yuklash
     useEffect(() => {
