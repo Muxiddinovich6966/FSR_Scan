@@ -9,7 +9,7 @@ import os
 SMTP_HOST = "smtp-relay.brevo.com"
 SMTP_PORT = 587
 SMTP_LOGIN = os.getenv("BREVO_LOGIN", "ad5b79001@smtp-brevo.com")
-SMTP_PASSWORD = os.getenv("BREVO_PASSWORD", "xsmtpsib-e05a1a40432e6f72ac31a2d6e59ad890adf2afb1761af1b42cb05ce7314e1060-MnCXbYes56ZqRQYq")
+SMTP_PASSWORD = os.getenv("BREVO_PASSWORD", "")
 FROM_EMAIL = "ad5b79001@smtp-brevo.com"
 
 # OTP saqlash (xotirada)
