@@ -4,9 +4,11 @@ import string
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-GMAIL = "norpolatovfarruxbek0@gmail.com"
-APP_PASSWORD = "aubh hpqb gdvp naiy"
-
+# GMAIL = "norpolatovfarruxbek0@gmail.com"
+# APP_PASSWORD = "aubh hpqb gdvp naiy"
+import os
+GMAIL = os.getenv("GMAIL", "norpolatovfarruxbek0@gmail.com")
+APP_PASSWORD = os.getenv("GMAIL_PASSWORD", "aubh hpqb gdvp naiy")
 # OTP saqlash (xotirada)
 otp_store = {}
 
