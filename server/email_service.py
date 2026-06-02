@@ -3,12 +3,15 @@ import random
 import string
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-
-# GMAIL = "norpolatovfarruxbek0@gmail.com"
-# APP_PASSWORD = "aubh hpqb gdvp naiy"
 import os
-GMAIL = os.getenv("GMAIL", "norpolatovfarruxbek0@gmail.com")
-APP_PASSWORD = os.getenv("GMAIL_PASSWORD", "aubh hpqb gdvp naiy")
+
+# Brevo SMTP
+SMTP_HOST = "smtp-relay.brevo.com"
+SMTP_PORT = 587
+SMTP_LOGIN = os.getenv("BREVO_LOGIN", "ad5b79001@smtp-brevo.com")
+SMTP_PASSWORD = os.getenv("BREVO_PASSWORD", "xsmtpsib-e05a1a40432e6f72ac31a2d6e59ad890adf2afb1761af1b42cb05ce7314e1060-MnCXbYes56ZqRQYq")
+FROM_EMAIL = "ad5b79001@smtp-brevo.com"
+
 # OTP saqlash (xotirada)
 otp_store = {}
 
@@ -23,7 +26,7 @@ def send_otp_email(to_email: str) -> bool:
     try:
         msg = MIMEMultipart("alternative")
         msg["Subject"] = "FSR SafeScan — Tasdiqlash kodi"
-        msg["From"] = GMAIL
+        msg["From"] = FROM_EMAIL
         msg["To"] = to_email
 
         html = f"""
@@ -42,9 +45,10 @@ def send_otp_email(to_email: str) -> bool:
 
         msg.attach(MIMEText(html, "html"))
 
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(GMAIL, APP_PASSWORD.replace(" ", ""))
-            server.sendmail(GMAIL, to_email, msg.as_string())
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SMTP_LOGIN, SMTP_PASSWORD)
+            server.sendmail(FROM_EMAIL, to_email, msg.as_string())
 
         print(f"[EMAIL] Yuborildi: {to_email}")
         return True
