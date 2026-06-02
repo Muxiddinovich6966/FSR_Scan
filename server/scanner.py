@@ -380,7 +380,11 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 from playwright.async_api import async_playwright
-from playwright_stealth import stealth_async
+try:
+    from playwright_stealth import stealth_async
+except ImportError:
+    async def stealth_async(page):
+        pass
 
 VT_API_KEY = "d75471e2cf0fe25d09b902d31c0bb8628dfd7a1518460bff4ee9f37151c83418"
 VT_BASE = "https://www.virustotal.com/api/v3"

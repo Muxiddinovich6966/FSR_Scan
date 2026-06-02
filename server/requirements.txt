@@ -7,3 +7,4 @@ beautifulsoup4
 playwright
 aiofiles
 python-multipart
+playwright-stealth
