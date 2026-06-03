@@ -66,7 +66,7 @@ import os
 import httpx
 
 # Brevo API
-BREVO_API_KEY = os.getenv("BREVO_API_KEY", "xsmtpsib-e05a1a40432e6f72ac31a2d6e59ad890adf2afb1761af1b42cb05ce7314e1060-6IrRVzxVAXrvKoNc")
+BREVO_API_KEY = os.getenv("BREVO_API_KEY", "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")
 FROM_EMAIL = "norpolatovfarruxbek0@gmail.com"
 FROM_NAME = "FSR SafeScan"
 
