@@ -403,8 +403,8 @@ def startup():
     print("FSR SafeScan API v3 ishga tushdi!")
 
 # Static files
-CLIENT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "client")
-ADMIN_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "admin")
+CLIENT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)),"client")
+ADMIN_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)),"admin")
 
 if os.path.exists(CLIENT_DIR):
     app.mount("/app", StaticFiles(directory=CLIENT_DIR, html=True), name="client")
