@@ -65,11 +65,13 @@ import string
 import os
 import httpx
 
-# Brevo API
-BREVO_API_KEY = os.getenv("BREVO_API_KEY", "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")
-FROM_EMAIL = "norpolatovfarruxbek0@gmail.com"
-FROM_NAME = "FSR SafeScan"
-
+# # Brevo API
+# BREVO_API_KEY = os.getenv("BREVO_API_KEY", "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")
+# FROM_EMAIL = "norpolatovfarruxbek0@gmail.com"
+# FROM_NAME = "FSR SafeScan"
+import smtplib
+GMAIL = "norpolatovfarruxbek0@gmail.com"
+APP_PASSWORD = "aubh hpqb gdvp naiy"
 # OTP saqlash
 otp_store = {}
 
