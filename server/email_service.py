@@ -60,19 +60,16 @@
 #     return False
 
 
+import smtplib
 import random
 import string
 import os
-import httpx
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
-# # Brevo API
-# BREVO_API_KEY = os.getenv("BREVO_API_KEY", "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")
-# FROM_EMAIL = "norpolatovfarruxbek0@gmail.com"
-# FROM_NAME = "FSR SafeScan"
-import smtplib
-GMAIL = "norpolatovfarruxbek0@gmail.com"
-APP_PASSWORD = "aubh hpqb gdvp naiy"
-# OTP saqlash
+GMAIL = os.getenv("GMAIL", "norpolatovfarruxbek0@gmail.com")
+APP_PASSWORD = os.getenv("GMAIL_PASSWORD", "aubh hpqb gdvp naiy").replace(" ", "")
+
 otp_store = {}
 
 def generate_otp() -> str:
@@ -84,38 +81,33 @@ def send_otp_email(to_email: str) -> bool:
     print(f"[EMAIL] OTP: {otp} → {to_email}")
 
     try:
-        response = httpx.post(
-            "https://api.brevo.com/v3/smtp/email",
-            headers={
-                "api-key": BREVO_API_KEY,
-                "Content-Type": "application/json"
-            },
-            json={
-                "sender": {"name": FROM_NAME, "email": FROM_EMAIL},
-                "to": [{"email": to_email}],
-                "subject": "FSR SafeScan — Tasdiqlash kodi",
-                "htmlContent": f"""
-                <div style="font-family:sans-serif;max-width:480px;margin:0 auto;background:#0f172a;color:#f1f5f9;padding:32px;border-radius:16px">
-                    <div style="text-align:center;margin-bottom:24px">
-                        <div style="font-size:48px">🛡️</div>
-                        <h2 style="color:#38bdf8;letter-spacing:2px">FSR SafeScan</h2>
-                    </div>
-                    <p style="color:#94a3b8;margin-bottom:16px">Ro'yxatdan o'tish uchun tasdiqlash kodingiz:</p>
-                    <div style="background:#1e293b;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px">
-                        <div style="font-size:36px;font-weight:800;letter-spacing:8px;color:#38bdf8">{otp}</div>
-                    </div>
-                    <p style="color:#64748b;font-size:13px">Bu kod 10 daqiqa amal qiladi.</p>
-                </div>
-                """
-            },
-            timeout=10
-        )
-        if response.status_code == 201:
-            print(f"[EMAIL] Yuborildi: {to_email}")
-            return True
-        else:
-            print(f"[EMAIL] Xatolik: {response.status_code} {response.text}")
-            return False
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = "FSR SafeScan — Tasdiqlash kodi"
+        msg["From"] = GMAIL
+        msg["To"] = to_email
+
+        html = f"""
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto;background:#0f172a;color:#f1f5f9;padding:32px;border-radius:16px">
+            <div style="text-align:center;margin-bottom:24px">
+                <div style="font-size:48px">🛡️</div>
+                <h2 style="color:#38bdf8;letter-spacing:2px">FSR SafeScan</h2>
+            </div>
+            <p style="color:#94a3b8;margin-bottom:16px">Ro'yxatdan o'tish uchun tasdiqlash kodingiz:</p>
+            <div style="background:#1e293b;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px">
+                <div style="font-size:36px;font-weight:800;letter-spacing:8px;color:#38bdf8">{otp}</div>
+            </div>
+            <p style="color:#64748b;font-size:13px">Bu kod 10 daqiqa amal qiladi.</p>
+        </div>
+        """
+        msg.attach(MIMEText(html, "html"))
+
+        # SSL 465 port
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(GMAIL, APP_PASSWORD)
+            server.sendmail(GMAIL, to_email, msg.as_string())
+
+        print(f"[EMAIL] Yuborildi: {to_email}")
+        return True
     except Exception as e:
         print(f"[EMAIL] Xatolik: {e}")
         return False
